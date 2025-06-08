@@ -24,32 +24,41 @@ import {
 } from "@/components/ui/select";
 import { subjects } from "@/constants";
 import { Textarea } from "@/components/ui/textarea";
+import { createCompanion } from "@/lib/actions/companion.actions";
+import { redirect } from "next/navigation";
 
 const formSchema = z.object({
-  name: z.string().min(2, {message: 'Companion is required'}),
-  subject: z.string().min(2, {message: 'Subject is required'}),
-  topic: z.string().min(2, {message: 'Topic is required'}),
-  voice: z.string().min(2, {message: 'Voice is required'}),
-  style: z.string().min(2, {message: 'Style is required'}),
-  duration: z.coerce.number().min(2, {message: 'Duration is required'})
-})
+  name: z.string().min(2, { message: "Companion is required" }),
+  subject: z.string().min(2, { message: "Subject is required" }),
+  topic: z.string().min(2, { message: "Topic is required" }),
+  voice: z.string().min(2, { message: "Voice is required" }),
+  style: z.string().min(2, { message: "Style is required" }),
+  duration: z.coerce.number().min(2, { message: "Duration is required" }),
+});
 
 const CompanionForm = () => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: '',
-      subject: '',
-      topic: '',
-      voice: '',
-      style: '',
-      duration: 15
+      name: "",
+      subject: "",
+      topic: "",
+      voice: "",
+      style: "",
+      duration: 15,
     },
   });
 
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
-    console.log(values);
-  }
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    const companion = await createCompanion(values);
+
+    if (companion) {
+      redirect(`/companions/${companion.id}`);
+    } else{ 
+      console.log('Failed to create a companion');
+      redirect('/');
+    }
+  };
 
   return (
     <Form {...form}>
@@ -193,7 +202,9 @@ const CompanionForm = () => {
             </FormItem>
           )}
         />
-        <Button type="submit" className="w-full cursor-pointer">Build Your Comapnion</Button>
+        <Button type="submit" className="w-full cursor-pointer">
+          Build Your Comapnion
+        </Button>
       </form>
     </Form>
   );
