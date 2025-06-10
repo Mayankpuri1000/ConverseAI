@@ -6,6 +6,7 @@ import Lottie, { LottieRefCurrentProps } from "lottie-react";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import soundwaves from '@/constants/soundwaves.json'
+import { addToSessionHistory } from "@/lib/actions/companion.actions";
 
 enum CallStatus {
   INACTIVE = "INACTIVE",
@@ -15,6 +16,7 @@ enum CallStatus {
 }
 
 const CompanionComponent = ({
+  companionId,
   subject,
   topic,
   name,
@@ -43,7 +45,12 @@ const CompanionComponent = ({
 
   useEffect(() => {
     const onCallStart = () => setCallStatus(CallStatus.ACTIVE);
-    const onCallEnd = () => setCallStatus(CallStatus.FINISHED);
+    const onCallEnd = () => {
+      setCallStatus(CallStatus.FINISHED);
+
+      // add to session history
+      addToSessionHistory(companionId);
+    };
     const onMessage = (message: Message) => {
       if(message.type === 'transcript' && message.transcriptType === 'final'){
         const newMessage = { role: message.role, content: message.transcript }
